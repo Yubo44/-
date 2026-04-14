@@ -1,0 +1,23 @@
+page {
+  min-height: 100%;
+  background:
+    radial-gradient(circle at top, rgba(255, 245, 214, 0.75), transparent 42%),
+    linear-gradient(180deg, #f8f2e7 0%, #efe2ca 100%);
+  color: #17383c;
+  font-family: "PingFang SC", "Helvetica Neue", sans-serif;
+}
+
+button::after {
+  border: none;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1rpx;
+  height: 1rpx;
+  margin: -1rpx;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}

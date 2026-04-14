@@ -1,0 +1,14 @@
+{
+  "pages": [
+    "pages/index/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "梦游记",
+    "navigationBarBackgroundColor": "#f5efe2",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f6f0e4",
+    "backgroundTextStyle": "light"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

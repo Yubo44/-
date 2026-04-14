@@ -1,0 +1,264 @@
+<view class="page-shell">
+  <view class="hero-card">
+    <view class="hero-copy">
+      <text class="eyebrow">TRAVEL MEMORY MAP</text>
+      <text class="hero-title">梦游记</text>
+      <text class="hero-text">
+        把你去过的城市点亮，也把还没出发的计划先种在地图上。
+      </text>
+    </view>
+    <view class="stat-grid">
+      <view class="stat-card">
+        <text class="stat-value">{{visitedCount}}</text>
+        <text class="stat-label">已点亮</text>
+      </view>
+      <view class="stat-card">
+        <text class="stat-value">{{plannedCount}}</text>
+        <text class="stat-label">想去清单</text>
+      </view>
+      <view class="stat-card">
+        <text class="stat-value">{{totalCount}}</text>
+        <text class="stat-label">全部地点</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="panel-card">
+    <view class="panel-head">
+      <view>
+        <text class="panel-title">世界地图</text>
+        <text class="panel-subtitle">地球会缓慢自转，左右拖动可以把想看的城市转到正面</text>
+      </view>
+      <view class="ghost-action" bindtap="resetMapRotation">回正</view>
+    </view>
+
+    <view class="globe-scene">
+      <view class="globe-shadow"></view>
+      <view
+        class="globe-shell {{isDragging ? 'dragging' : ''}}"
+        bindtouchstart="onMapTouchStart"
+        bindtouchmove="onMapTouchMove"
+        bindtouchend="onMapTouchEnd"
+        bindtouchcancel="onMapTouchEnd"
+      >
+        <view class="globe-ocean"></view>
+        <view class="globe-ring"></view>
+        <view class="globe-texture-track" style="transform: translateX(-{{globeTextureOffset}}%);">
+          <view class="globe-texture-panel">
+            <image class="globe-texture-image" src="/assets/world-map-texture.svg" mode="scaleToFill"></image>
+          </view>
+          <view class="globe-texture-panel">
+            <image class="globe-texture-image" src="/assets/world-map-texture.svg" mode="scaleToFill"></image>
+          </view>
+        </view>
+        <view class="globe-limb"></view>
+        <view class="globe-terminator"></view>
+        <view class="globe-highlight"></view>
+        <view class="globe-atmosphere"></view>
+
+        <block wx:for="{{globePins}}" wx:key="pinKey">
+          <view
+            class="globe-pin {{item.status}} {{activePinId === item.pinKey ? 'active' : ''}}"
+            style="left: {{item.left}}%; top: {{item.top}}%; transform: translate(-50%, -50%) scale({{item.scale}}); opacity: {{item.opacity}}; z-index: {{item.zIndex}};"
+            data-pin-key="{{item.pinKey}}"
+            bindtap="onPinTap"
+          >
+            <view class="pin-core"></view>
+            <text class="pin-badge">{{item.cityLabel}}</text>
+          </view>
+        </block>
+      </view>
+
+      <view class="globe-caption">
+        <text>{{isDragging ? "正在手动转动地球" : "现在是自动缓慢自转状态，拖一下就能看另一面"}}</text>
+      </view>
+    </view>
+
+    <view class="legend-row">
+      <view class="legend-item">
+        <view class="legend-dot visited"></view>
+        <text>去过的地方会发光</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-dot planned"></view>
+        <text>没去过的地方会留下计划点</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="panel-card">
+    <view class="panel-head">
+      <view>
+        <text class="panel-title">添加城市</text>
+        <text class="panel-subtitle">搜索城市后选择“去过”或“没去过”</text>
+      </view>
+      <view class="draft-action" bindtap="clearDraft">清空输入</view>
+    </view>
+
+    <view class="field-stack">
+      <view class="field-block">
+        <text class="field-label">城市搜索</text>
+        <input
+          class="city-input"
+          placeholder="输入中文或英文城市名，例如：巴黎 / Paris"
+          placeholder-class="input-placeholder"
+          value="{{searchKeyword}}"
+          bindinput="onSearchInput"
+        />
+        <view wx:if="{{selectedCityLabel}}" class="selection-tip">
+          <text>已匹配：{{selectedCityLabel}} · {{selectedCountryLabel}}</text>
+        </view>
+        <view wx:elif="{{searchKeyword}}" class="selection-tip muted">
+          <text>没点候选项也能保存，但自定义地点不会显示在地图上。</text>
+        </view>
+      </view>
+
+      <view wx:if="{{filteredCities.length}}" class="suggestion-list">
+        <block wx:for="{{filteredCities}}" wx:key="id">
+          <view class="suggestion-item" data-city-id="{{item.id}}" bindtap="selectCity">
+            <view>
+              <text class="suggestion-title">{{item.label}}</text>
+              <text class="suggestion-subtitle">{{item.countryLabel}}</text>
+            </view>
+            <text class="suggestion-action">选择</text>
+          </view>
+        </block>
+      </view>
+
+      <view class="field-block">
+        <text class="field-label">旅行状态</text>
+        <view class="status-toggle">
+          <view class="status-option {{hasVisited ? 'active' : ''}}" bindtap="markVisited">去过</view>
+          <view class="status-option {{!hasVisited ? 'active' : ''}}" bindtap="markPlanned">没去过</view>
+        </view>
+      </view>
+
+      <view wx:if="{{hasVisited}}" class="field-stack">
+        <view class="field-block">
+          <text class="field-label">旅行回忆</text>
+          <textarea
+            class="memo-input"
+            maxlength="300"
+            placeholder="写下这座城市给你的感觉、吃到的东西、走过的路……"
+            placeholder-class="input-placeholder"
+            value="{{noteText}}"
+            bindinput="onNoteInput"
+          />
+        </view>
+
+        <view class="field-block">
+          <view class="photo-head">
+            <text class="field-label">照片</text>
+            <text class="field-hint">最多 6 张</text>
+          </view>
+          <view class="photo-grid">
+            <block wx:for="{{draftPhotos}}" wx:key="*this" wx:for-item="photo" wx:for-index="photoIndex">
+              <view class="photo-card">
+                <image
+                  class="photo-image"
+                  src="{{photo}}"
+                  mode="aspectFill"
+                  data-url="{{photo}}"
+                  bindtap="previewDraftPhoto"
+                ></image>
+                <view class="photo-delete" data-index="{{photoIndex}}" catchtap="removeDraftPhoto">删</view>
+              </view>
+            </block>
+
+            <view class="photo-add" bindtap="choosePhotos">
+              <text class="photo-add-mark">+</text>
+              <text class="photo-add-text">添加照片</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view wx:else class="field-block">
+        <text class="field-label">旅行计划</text>
+        <textarea
+          class="memo-input"
+          maxlength="300"
+          placeholder="这次想住哪里、吃什么、想看什么风景？"
+          placeholder-class="input-placeholder"
+          value="{{planText}}"
+          bindinput="onPlanInput"
+        />
+      </view>
+    </view>
+
+    <button class="save-button" bindtap="saveRecord">保存地点</button>
+  </view>
+
+  <view class="panel-card">
+    <view class="panel-head">
+      <view>
+        <text class="panel-title">旅行清单</text>
+        <text class="panel-subtitle">已保存的城市支持删除，照片也可以单独删除</text>
+      </view>
+    </view>
+
+    <view class="filter-row">
+      <view class="filter-chip {{listFilter === 'all' ? 'active' : ''}}" data-filter="all" bindtap="changeFilter">全部</view>
+      <view class="filter-chip {{listFilter === 'visited' ? 'active' : ''}}" data-filter="visited" bindtap="changeFilter">去过</view>
+      <view class="filter-chip {{listFilter === 'planned' ? 'active' : ''}}" data-filter="planned" bindtap="changeFilter">没去过</view>
+    </view>
+
+    <view wx:if="{{visibleRecords.length}}" class="record-list">
+      <block wx:for="{{visibleRecords}}" wx:key="id" wx:for-item="record">
+        <view
+          class="record-card {{activePinId === record.pinKey ? 'active' : ''}}"
+          data-id="{{record.id}}"
+          bindtap="activateRecord"
+        >
+          <view class="record-head">
+            <view class="record-title-wrap">
+              <text class="record-title">{{record.cityLabel}}</text>
+              <text class="record-subtitle">{{record.countryLabel}}</text>
+            </view>
+            <view class="record-meta">
+              <text class="status-pill {{record.status}}">{{record.statusText}}</text>
+              <text class="record-date">{{record.dateLabel}}</text>
+            </view>
+          </view>
+
+          <text class="record-text">{{record.previewText}}</text>
+
+          <view wx:if="{{record.photos.length}}" class="record-photo-grid">
+            <block wx:for="{{record.photos}}" wx:key="*this" wx:for-item="photo" wx:for-index="photoIndex">
+              <view class="record-photo-card">
+                <image
+                  class="record-photo"
+                  src="{{photo}}"
+                  mode="aspectFill"
+                  data-id="{{record.id}}"
+                  data-url="{{photo}}"
+                  bindtap="previewRecordPhoto"
+                ></image>
+                <view
+                  class="photo-delete"
+                  data-id="{{record.id}}"
+                  data-photo-index="{{photoIndex}}"
+                  catchtap="removeRecordPhoto"
+                >
+                  删
+                </view>
+              </view>
+            </block>
+          </view>
+
+          <view class="record-actions">
+            <view class="record-action muted" wx:if="{{!record.hasCoords}}">
+              自定义地点不会显示在地图上
+            </view>
+            <view class="record-action danger" data-id="{{record.id}}" catchtap="removeRecord">删除地点</view>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <view wx:else class="empty-state">
+      <text class="empty-title">地图还没有被点亮</text>
+      <text class="empty-text">先搜索一个城市，写下回忆或计划，它就会出现在你的梦游记里。</text>
+    </view>
+  </view>
+</view>
