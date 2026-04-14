@@ -45,10 +45,10 @@
         <view class="globe-ring"></view>
         <view class="globe-texture-track" style="transform: translateX(-{{globeTextureOffset}}%);">
           <view class="globe-texture-panel">
-            <image class="globe-texture-image" src="/assets/world-map-texture.svg" mode="scaleToFill"></image>
+            <image class="globe-texture-image" src="/assets/world-map-texture.png" mode="scaleToFill"></image>
           </view>
           <view class="globe-texture-panel">
-            <image class="globe-texture-image" src="/assets/world-map-texture.svg" mode="scaleToFill"></image>
+            <image class="globe-texture-image" src="/assets/world-map-texture.png" mode="scaleToFill"></image>
           </view>
         </view>
         <view class="globe-limb"></view>

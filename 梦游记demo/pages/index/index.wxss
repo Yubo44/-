@@ -196,7 +196,7 @@
 .globe-texture-image {
   width: 100%;
   height: 100%;
-  opacity: 0.46;
+  opacity: 0.76;
 }
 
 .globe-limb {
